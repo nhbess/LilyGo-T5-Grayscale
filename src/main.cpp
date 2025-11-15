@@ -120,18 +120,4 @@ void loop()
 
     run_and_plot_ca(device);
     
-
-
-
-    // End CA Logic
-    
-    
-    
-    
-    // Wait for button release
-    while (digitalRead(BUTTON_PIN) == LOW) {
-        delay(10);
-    }
-    
-    // Loop back to light sleep
 }
