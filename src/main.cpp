@@ -32,36 +32,50 @@ void run_and_plot_ca(ePaperDisplay* device) {
 
     Serial.println("Initializing CA...");
     
+    // Clean up existing CA if present
+    if (ca != nullptr) {
+        delete ca;
+        ca = nullptr;
+    }
+    
     int width = device->width();
     int height = device->height();
 
     ca = new CellularAutomaton(width, height);
 
-
-    for (int i = 0; i < 100; i++) {  // Run for 100 steps
-        uint8_t* old_state = ca->state();
-        uint8_t* old_copy = new uint8_t[width * height];
-        memcpy(old_copy, old_state, width * height);
-
-        uint8_t* new_state = ca->step();
-
-        Serial.print("CA Step: ");
-        Serial.println(i);
-
-        // Update display - only changed pixels
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                int idx = y * width + x;
-                if (old_copy[idx] != new_state[idx]) {
-                    device->drawPixel(x, y, new_state[idx] ? ePaper_BLACK : ePaper_WHITE);
-                }
-            }
+    // Run CA for 100 steps
+    for (int i = 0; i < 100; i++) {
+        ca->step();
+        
+        if (i % 10 == 0) {  // Print progress every 10 steps
+            Serial.print("CA Step: ");
+            Serial.println(i);
         }
-    
-        //device->refreshDisplay();
-        delete[] old_copy;
-
     }
+    
+    // Plot the final state to the ePaper display
+    Serial.println("Plotting CA state to ePaper display...");
+    uint8_t* final_state = ca->state();
+    
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            uint8_t cell_value = final_state[y * width + x];
+            uint16_t color;
+            
+            // CA produces binary values (0 or 1)
+            // Map to grayscale: 0 -> white, 1 -> black
+            if (cell_value == 0) {
+                color = ePaper_WHITE;
+            } else {
+                color = ePaper_BLACK;
+            }
+            
+            device->drawPixel(x, y, color);
+        }
+    }
+    
+    device->refreshDisplay();
+    Serial.println("CA display complete.");
 }
 
 
