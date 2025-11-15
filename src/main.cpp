@@ -43,7 +43,7 @@ void run_and_plot_ca(ePaperDisplay* device) {
 
     ca = new CellularAutomaton(width, height);
 
-    // Run CA for 100 steps
+    // Run CA for 50 steps
     for (int i = 0; i < 100; i++) {
         ca->step();
         

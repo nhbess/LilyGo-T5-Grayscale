@@ -26,30 +26,34 @@ uint8_t* CellularAutomaton::state() {
 }
 
 void CellularAutomaton::computeNext() {
+    uint8_t* current = grid->raw();
+    uint8_t* next = nextGrid->raw();
+    
+    // Optimized: direct pointer access, unrolled neighbor checks, minimal branching
     for (int y = 0; y < height; y++) {
+        int yPrev = (y == 0) ? height - 1 : y - 1;
+        int yNext = (y == height - 1) ? 0 : y + 1;
+        
         for (int x = 0; x < width; x++) {
-
-            int count = 0;
-
-            for (int dy = -1; dy <= 1; dy++) {
-                for (int dx = -1; dx <= 1; dx++) {
-
-                    if (dx == 0 && dy == 0) continue;
-
-                    int nx = (x + dx + width) % width;
-                    int ny = (y + dy + height) % height;
-
-                    count += (*grid)(ny, nx);
-                }
-            }
-
-            uint8_t cell = (*grid)(y, x);
-
-            uint8_t newCell =
-                (cell == 1 && (count == 2 || count == 3)) ||
-                (cell == 0 && count == 3) ? 1 : 0;
-
-            (*nextGrid)(y, x) = newCell;
+            int xPrev = (x == 0) ? width - 1 : x - 1;
+            int xNext = (x == width - 1) ? 0 : x + 1;
+            
+            // Direct array access - unrolled neighbor sum
+            int count = 
+                current[yPrev * width + xPrev] +
+                current[yPrev * width + x]     +
+                current[yPrev * width + xNext] +
+                current[y * width + xPrev]     +
+                current[y * width + xNext]     +
+                current[yNext * width + xPrev] +
+                current[yNext * width + x]     +
+                current[yNext * width + xNext];
+            
+            int idx = y * width + x;
+            uint8_t cell = current[idx];
+            
+            // Conway's Game of Life rules
+            next[idx] = (count == 3 || (cell && count == 2)) ? 1 : 0;
         }
     }
 }
