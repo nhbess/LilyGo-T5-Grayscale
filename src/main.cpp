@@ -1,9 +1,11 @@
 #include <ePaperDriver.h>
 #include "cellular_automaton.h"
+#include "cellular_multy.h"
 #include "display_utils.h"
 
 ePaperDisplay *device = nullptr;
 CellularAutomaton *ca = nullptr;
+//MNCA *ca = nullptr;
 
 #define SPI_MOSI            (23)
 #define SPI_MISO            (-1)
@@ -42,9 +44,10 @@ void run_and_plot_ca(ePaperDisplay* device) {
     int height = device->height();
 
     ca = new CellularAutomaton(width, height);
+    //ca = new MNCA(width, height);
 
     // Run CA for 50 steps
-    for (int i = 0; i < 100; i++) {
+    for (int i = 0; i < 50; i++) {
         ca->step();
         
         if (i % 10 == 0) {  // Print progress every 10 steps
